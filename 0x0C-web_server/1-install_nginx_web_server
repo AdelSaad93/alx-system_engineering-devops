@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Installs Nginx with the following configurations:
-# Listens on port 80.
-# Returns a page containing "Hello World!" when queried
-# at the root with a curl GET request.
+# - Listens on port 80.
+# - Returns a page containing "Hello World!" when queried at the root with a curl GET request.
 
 # Update package lists
 apt-get update
@@ -15,17 +14,19 @@ mkdir -p /var/www/html
 echo "Hello World!" > /var/www/html/index.html
 
 # Configure Nginx to serve the custom HTML file
-printf %s "server {
-    listen      80 default_server;
-    listen      [::]:80 default_server;
-    root        /var/www/html;
-    index       index.html index.htm;
+cat > /etc/nginx/sites-available/default << 'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.html;
 
     location / {
-        try_files \$uri \$uri/ =404;
+        try_files $uri $uri/ =404;
     }
 }
-" > /etc/nginx/sites-available/default
+EOF
 
-# Restart Nginx to apply the changes
+# Restart Nginx to apply the changes without using systemctl
 service nginx restart
