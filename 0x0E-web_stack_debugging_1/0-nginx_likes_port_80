@@ -1,8 +1,49 @@
 #!/usr/bin/env bash
-# fix Ubuntu container's to listen on port 80
 
+# This script updates the Nginx configuration to listen on port 80 instead of port 8080.
+
+# Variables
 new="80 default_server"
 old="8080 default_server"
-sed -i "s/$old/$new/" /etc/nginx/sites-enabled/default
+nginx_config="/etc/nginx/sites-enabled/default"
 
-service nginx restart
+# Check if the Nginx configuration file exists
+if [[ -f "$nginx_config" ]]; then
+	echo "Nginx configuration file found: $nginx_config"
+
+	# Replace the old port with the new port in the configuration file
+	sed -i "s/$old/$new/" "$nginx_config"
+	echo "Updated Nginx configuration to listen on port 80."
+
+	# Test Nginx configuration
+	nginx -t
+	if [[ $? -ne 0 ]]; then
+		echo "Nginx configuration test failed. Please check the configuration."
+		exit 1
+	fi
+
+	# Restart the Nginx service to apply changes
+	service nginx restart
+
+	# Check if the Nginx service restarted successfully
+	if [[ $? -eq 0 ]]; then
+		echo "Nginx service restarted successfully."
+	else
+		echo "Failed to restart Nginx service. Please check the configuration."
+		exit 1
+	fi
+else
+	echo "Nginx configuration file not found: $nginx_config"
+	exit 1
+fi
+
+# Check if Nginx is listening on port 80
+sleep 2
+curl -s -o /dev/null -w "%{http_code}" http://localhost:80
+if [[ $? -eq 0 ]]; then
+	echo "Nginx is responding on port 80."
+else
+	echo "Nginx is not responding on port 80. Please check the configuration and firewall settings."
+	exit 1
+fi
+
