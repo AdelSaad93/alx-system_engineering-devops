@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 """
-Function that queries the Reddit API and returns the number of subscribers
-(not active users, total subscribers) for a given subreddit.
-If an invalid subreddit is given, the function should return 0.
+Module for querying the Reddit API to get the number of subscribers of a subreddit.
 """
 
 import requests
@@ -10,20 +8,30 @@ import requests
 
 def number_of_subscribers(subreddit):
     """
-    Function that queries the Reddit API
-    - If not a valid subreddit, return 0.
-    """
-    url = "https://www.reddit.com/r/{}/about.json".format(subreddit)
-    headers = {"User-Agent": "Custom"}
+    Queries the Reddit API and returns the number of subscribers for a given subreddit.
+    If an invalid subreddit is provided, return 0.
 
+    Args:
+        subreddit (str): The name of the subreddit to query.
+
+    Returns:
+        int: The number of subscribers, or 0 if the subreddit is invalid.
+    """
+    # Set up the URL for the Reddit API request
+    url = f"https://www.reddit.com/r/{subreddit}/about.json"
+    # Set up custom User-Agent to avoid Too Many Requests error
+    headers = {"User-Agent": "Custom-User-Agent"}
+
+    # Perform the request and disable redirects
     try:
-        req = requests.get(url, headers=headers, allow_redirects=False)
-        if req.status_code == 200:
-            print("OK")  # Print "OK" for valid subreddit
-            return req.json().get("data").get("subscribers", 0)
+        response = requests.get(url, headers=headers, allow_redirects=False)
+        if response.status_code == 200:
+            # Successfully got a response, extract the number of subscribers
+            data = response.json().get("data", {})
+            return data.get("subscribers", 0)
         else:
-            print("OK")  # Print "OK" for non-existent subreddit
+            # Invalid subreddit or other errors, return 0
             return 0
-    except Exception as e:
-        print("OK")  # Handle errors and print "OK"
+    except requests.RequestException:
+        # Catch any request errors and return 0
         return 0
