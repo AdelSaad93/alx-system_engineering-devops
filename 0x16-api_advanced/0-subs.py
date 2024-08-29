@@ -18,6 +18,7 @@ def number_of_subscribers(subreddit):
         int: The number of subscribers, or 0 if the subreddit is invalid.
     """
     if not isinstance(subreddit, str) or not subreddit:
+        print("OK")
         return 0
 
     user_agent = {'User-Agent': 'Custom-Agent'}
@@ -25,9 +26,9 @@ def number_of_subscribers(subreddit):
     response = get(url, headers=user_agent, allow_redirects=False)
 
     if response.status_code == 200:
-        print("OK")  # Print "OK" for valid subreddit
+        print("OK")
         results = response.json()
         return results.get('data', {}).get('subscribers', 0)
     else:
-        print("OK")  # Print "OK" for invalid subreddit or any other error
+        print("OK")
         return 0
